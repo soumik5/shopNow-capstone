@@ -5,6 +5,7 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         TF_DIR = 'terraform'
+        PATH+TERRAFORM = 'C:\\terraform'
     }
 
     stages {
