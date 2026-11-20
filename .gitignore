@@ -1,0 +1,21 @@
+# Terraform providers and executables
+.terraform/
+terraform.exe
+*.exe
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform variables
+terraform.tfvars
+*.auto.tfvars
+
+# Terraform plans
+*.tfplan
+
+# Sensitive credentials
+*.pem
+*.key
+.env
