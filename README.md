@@ -103,4 +103,257 @@ The infrastructure provisioning workflow will look like this:
      
         ![alt text](CreateUser-1.jpg)
 
-  
+        ![alt text](UserCreated.jpg)
+
+    2. Configure AWS CLI
+        
+        Install AWS CLI on the system where Jenkins will execute Terraform. first we need to find out aws version and then do aws configuration 
+        below are the command
+        aws --version
+        aws configure
+        ![alt text](AwsVersion.jpg)
+
+        ![alt text](awsconfigure.jpg)
+
+    3. Install Terraform 
+
+        Terraform must be installed on the machine where Jenkins executes the pipeline.
+
+        ![alt text](<terraform install.jpg>)
+    
+    4. Create Project Directory
+
+      ShopNow-DevOps/
+    │
+    ├── terraform/
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   ├── outputs.tf
+    │   ├── providers.tf
+    │   ├── backend.tf
+    │   ├── terraform.tfvars
+    │   └── modules/
+    │
+    ├── Jenkinsfile
+    │
+    ├── Screenshots/
+    │
+    └── README.md
+
+    5.Configure Terraform AWS Provider
+
+      Create providers.tf and this configuration tells Terraform:
+      - Use Terraform version 1.5 or newer.
+      - Download the AWS provider.
+      - Use AWS as the cloud provider.
+      - Deploy resources in the region defined by aws_region.
+
+        ![alt text](<terraform providers.jpg>)
+
+    6.Define Variables
+      
+      Create variables.tf. and These variables make the infrastructure reusable.
+
+      For example, the same Terraform code can be used for:
+      - Development
+      - Staging
+      - Production
+      Instead of rewriting Terraform files for each environment, you simply change the environment variables.
+
+    7. Create AWS VPC
+
+        Create main.tf. First, configure the VPC. and This provides a private network for your AWS infrastructure.
+
+    8. Create Internet Gateway
+
+        An Internet Gateway allows resources in public subnets to communicate with the internet, when routing and security rules permit.
+
+        Add the following to main.tf:The Internet Gateway will be attached to your VPC.
+
+    9. Create Public Subnets
+
+       We will create two public subnets in different Availability Zones.AWS EKS clusters typically require subnets in at least two Availability Zones for high availability.This allows the infrastructure to remain more resilient if one Availability Zone experiences an issue.
+
+    10. Create Private Subnets
+
+        Private subnets are intended for resources that should not directly receive inbound internet traffic.
+
+        For example:
+        - Kubernetes worker nodes
+        - Application workloads
+        - Databases
+        - Internal services
+
+    11. Create Public Route Table
+
+        Create a route table:means traffic destined for any IPv4 address outside the VPC will be routed through the Internet Gateway.
+
+        Associate the route table with the public subnets:
+
+    12. Create Security Group
+
+        Security Groups control inbound and outbound traffic.
+
+        For this infrastructure, we will create a security group for an EC2 instance.
+        Do not leave SSH open to everyone (0.0.0.0/0) unless it is a temporary lab environment and you fully understand the risk.
+
+    13. Create EC2 Instance
+
+        Terraform can also create an EC2 instance.
+
+        This instance could be used for:
+        - Jenkins
+        - Administration
+        - Testing
+      - Supporting services
+
+    14. Configure Terraform Outputs
+
+        Create outputs.tf and Outputs allow us to retrieve resource information after Terraform completes.
+
+    15. Test Terraform Locally
+
+        Before integrating Terraform with Jenkins, test the configuration locally.
+
+        Navigate to your Terraform folder:
+
+        Terraform init
+        ![alt text](terraforminit.jpg)
+
+        Terraform Validate
+
+        ![alt text](terraformvalidate.jpg)
+
+        Terraform plan 
+        ![alt text](<terraformplan .jpg>)
+
+        Terraform apply 
+        ![alt text](terraformapply.jpg)
+
+    16. Configure S3 Remote Backend   
+
+        Terraform state files contain information about managed infrastructure. By default, Terraform stores the state locally in:
+        terraform.tfstate
+
+      Step 1 - Create S3 Bucket 
+        
+        AWS Console → S3 → Create Bucket  - Bucket name (shopnow-terraform-state-unique-123456)
+        Bucket names must be globally unique.
+
+        Configure:
+        - Block all public access
+        - Enable versioning
+        - Enable server-side encryption
+        - Restrict access through IAM
+        - Enable logging where appropriate
+          Versioning helps recover earlier state versions if an accidental change occurs.
+
+        ![alt text](awss3bucketstatus.jpg)
+
+      Step 2 - Configure Backend 
+
+        Create backend.tf and Replace the bucket name with your actual bucket.
+
+        The S3 backend stores state remotely, and S3 lock files help coordinate concurrent Terraform operations.
+
+    17. Push Terraform Code to GitHub   
+
+        Create a GitHub repository and Suggested structure
+
+        ShopNow-DevOps/
+        │
+        ├── terraform/
+        │   ├── main.tf
+        │   ├── variables.tf
+        │   ├── outputs.tf
+        │   ├── providers.tf
+        │   ├── backend.tf
+        │   └── terraform.tfvars
+        │
+        ├── Jenkinsfile
+        ├── Screenshots/
+        └── README.md
+
+    18. Configure Jenkins
+
+       Step 1: Jenkins will automatically execute Terraform commands and the workflow will be :
+
+                        GitHub
+                          |
+                          v
+                        Jenkins Pipeline
+                          |
+                          v
+                        Terraform Init
+                          |
+                          v
+                        Terraform Validate
+                          |
+                          v
+                        Terraform Plan
+                          |
+                          v
+                        Terraform Apply
+                          |
+                          v
+                        AWS Infrastructure
+
+            ![alt text](jenkins.jpg)
+
+            ![alt text](jenkinspipelinecreated.jpg)
+ 
+            ![alt text](pipelinerunsuccessfully.jpg)
+
+       Step 2 : Configure AWS Credentials in Jenkins
+
+                Manage Jenkins → Credentials → System → Global credentials
+
+                If using access keys for a temporary learning setup:
+                - Kind: Secret text or username/password, depending on the credential setup
+                - Store the AWS Access Key ID
+                - Store the AWS Secret Access Key securely
+                For a production environment, use IAM roles or temporary credentials rather than long-lived access keys.
+
+    19. Create Jenkins Pipeline
+
+        Create a Jenkinsfile in the repository root and this pipeline will 
+          Clone the GitHub repository.
+          Initialize Terraform.
+          Validate Terraform.
+          Generate a Terraform plan.
+          Ask for approval.
+          Provision infrastructure.
+
+    20. Create Jenkins Job
+        
+        Go to Jenkins.
+
+        ![alt text](jenkinspipelinecreated-1.jpg)
+        
+        ![alt text](JenkinsBuildsucessfully.jpg)
+
+        
+
+    21. Run the Jenkins Pipeline
+
+      | Stage | Expected Result |
+      |---|---|
+      | Checkout | GitHub code downloaded |
+      | Terraform Init | Terraform initialized |
+      | Terraform Validate | Configuration validated |
+      | Terraform Plan | AWS resource plan generated |
+      | Approval | User approves infrastructure changes |
+      | Terraform Apply | AWS resources created |
+
+        ![alt text](pipelinerunsuccessfully-1.jpg)
+
+    22. Verify Infrastructure in AWS
+
+        After the Jenkins pipeline completes, log in to AWS Console and Verify the resources.
+
+    Final Output - AWS and Terraform 
+    
+    ![alt text](projectrunwithbackendusingjenkins.jpg)
+
+
+## Sprint 3
