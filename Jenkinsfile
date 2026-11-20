@@ -3,10 +3,10 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'
-        TF_DIR = 'terraform'
-        PATH+TERRAFORM = 'C:\\terraform'
-    }
+    AWS_REGION = 'us-east-1'
+    TF_DIR = 'terraform'
+    PATH = "C:\\terraform;${env.PATH}"
+}
 
     stages {
 
