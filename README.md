@@ -80,6 +80,13 @@ Notice that Jenkins is outside the EKS cluster. This keeps CI infrastructure sep
 
 
 ### - Dockerize the web application by creating a Dockerfile and storing the image in AWS ECR.
+#### -> Docker-compose file is created to build all the docker images and test the application locally. docker-compose file is [placed in the project directory for your reference.
+<img width="1896" height="840" alt="image" src="https://github.com/user-attachments/assets/7c4f0d1f-4b4b-407a-865f-2196e78cf112" />
+
+#### -> Pushed all the images to AWS ECR.
+<img width="1622" height="952" alt="image" src="https://github.com/user-attachments/assets/54b4ee4f-3ea8-4f3e-b32c-e496124fa44e" />
+<img width="1891" height="552" alt="image" src="https://github.com/user-attachments/assets/89e645a0-6b68-4de8-80ad-ff9abc34f38b" />
+
 ### - Set up a Jenkins server on AWS EC2 and configure necessary plugins (Docker, Kubernetes, AWS CLI).
 ### - Configure Jenkins to access EKS and AWS resources using credentials and AWS IAM roles.
 ### - Set up Git integration for Jenkins to trigger builds based on code changes.
