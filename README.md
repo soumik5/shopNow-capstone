@@ -357,3 +357,9 @@ The infrastructure provisioning workflow will look like this:
 
 
 ## Sprint 3
+
+Sprint 3: Configuration Management with Ansible and Jenkins Pipeline
+
+
+
+![alt text](image-1.png)
