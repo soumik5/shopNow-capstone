@@ -38,7 +38,55 @@ shopNow/
 ---
 
 
-## SPRINT-1
+# Sprint 1: Architecture Design, Dockerization, and Jenkins Setup
+
+## Tasks:
+### - Design the application architecture for deployment on AWS EKS.
+<img width="1110" height="2950" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/1b67ef4c-ac4f-4466-9371-c8c08356a396" />
+
+Let's divide it into four layers.
+
+Layer 1 – User access
+- Customers access the frontend.
+- Administrators access the admin dashboard.
+- The AWS load balancer receives incoming traffic.
+- Kubernetes Ingress routes requests to the correct application.
+Layer 2 – Application layer
+
+Inside EKS:
+- Frontend Pods run the React application through Nginx.
+- Admin Pods run the admin React application through Nginx.
+- Backend Pods run the Node.js API.
+We will use Kubernetes Deployments for these three stateless applications.
+
+Layer 3 – Database layer
+
+MongoDB stores:
+- Customer information
+- Product information
+- Orders
+- Shopping cart information
+The repository currently describes MongoDB as a StatefulSet with persistent storage. For a learning deployment, we can retain that design using EBS-backed persistent volumes. For production, I would evaluate MongoDB Atlas or Amazon DocumentDB as managed alternatives.
+
+Layer 4 – CI/CD layer
+
+This is where Jenkins comes in:
+- GitHub stores source code.
+- Jenkins EC2 receives GitHub webhook notifications.
+- Jenkins builds Docker images.
+- ECR stores the images.
+- EKS pulls the images when workloads are deployed or updated.
+Notice that Jenkins is outside the EKS cluster. This keeps CI infrastructure separate from application infrastructure.
+
+
+### - Dockerize the web application by creating a Dockerfile and storing the image in AWS ECR.
+### - Set up a Jenkins server on AWS EC2 and configure necessary plugins (Docker, Kubernetes, AWS CLI).
+### - Configure Jenkins to access EKS and AWS resources using credentials and AWS IAM roles.
+### - Set up Git integration for Jenkins to trigger builds based on code changes.
+### - Goal: Complete the application architecture, Dockerize the application, and establish a Jenkins server for CI/CD.
+
+
+
 
 
 ## SPRINT-2
