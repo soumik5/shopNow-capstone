@@ -156,9 +156,10 @@ The infrastructure provisioning workflow will look like this:
         
         Terraform requires permissions to create and manage AWS resources.
      
-        ![alt text](CreateUser-1.jpg)
+        <img width="2880" height="1800" alt="CreateUser-1" src="https://github.com/user-attachments/assets/4a9b459e-5249-4e27-a3ef-4ee421ad5d1a" />
 
-        ![alt text](UserCreated.jpg)
+        <img width="2880" height="1800" alt="UserCreated" src="https://github.com/user-attachments/assets/4a60a2e5-bcad-40b5-86a3-842e9cc75ac6" />
+
 
     2. Configure AWS CLI
         
@@ -166,17 +167,21 @@ The infrastructure provisioning workflow will look like this:
         below are the command
         aws --version
         aws configure
-        ![alt text](AwsVersion.jpg)
+       
+        <img width="2338" height="1216" alt="AwsVersion" src="https://github.com/user-attachments/assets/32eba107-ccaf-4fad-a914-0084c163fc8c" />
 
-        ![alt text](awsconfigure.jpg)
 
-    3. Install Terraform 
+        <img width="2360" height="1228" alt="awsconfigure" src="https://github.com/user-attachments/assets/21f91d55-716c-4a76-8c65-00293ac65ce0" />
+
+
+    4. Install Terraform 
 
         Terraform must be installed on the machine where Jenkins executes the pipeline.
 
-        ![alt text](<terraform install.jpg>)
+        <img width="2316" height="234" alt="terraform install" src="https://github.com/user-attachments/assets/1bfa10c6-52bb-4e9c-a986-3d9572a18038" />
+
     
-    4. Create Project Directory
+    5. Create Project Directory
 
       ShopNow-DevOps/
     │
@@ -203,7 +208,8 @@ The infrastructure provisioning workflow will look like this:
       - Use AWS as the cloud provider.
       - Deploy resources in the region defined by aws_region.
 
-        ![alt text](<terraform providers.jpg>)
+        <img width="2346" height="1216" alt="terraform providers" src="https://github.com/user-attachments/assets/790b1b25-5a1e-4a3a-934b-04758ce1044c" />
+
 
     6.Define Variables
       
@@ -273,17 +279,21 @@ The infrastructure provisioning workflow will look like this:
         Navigate to your Terraform folder:
 
         Terraform init
-        ![alt text](terraforminit.jpg)
+        <img width="2356" height="280" alt="terraforminit" src="https://github.com/user-attachments/assets/a687c7be-b1fb-4998-b09e-67032fc14c23" />
+
 
         Terraform Validate
 
-        ![alt text](terraformvalidate.jpg)
+        <img width="2356" height="1214" alt="terraformvalidate" src="https://github.com/user-attachments/assets/ed335c7b-94e0-4e28-b73f-84712418717f" />
+
 
         Terraform plan 
-        ![alt text](<terraformplan .jpg>)
+         <img width="2880" height="1800" alt="terraformplan " src="https://github.com/user-attachments/assets/9fd004d9-87ea-4e46-b5e4-56087c26de13" />
 
-        Terraform apply 
-        ![alt text](terraformapply.jpg)
+
+         Terraform apply 
+         <img width="2880" height="1794" alt="terraformapply" src="https://github.com/user-attachments/assets/aa4a57e3-7589-4201-a084-e5df34c406fc" />
+
 
     16. Configure S3 Remote Backend   
 
@@ -292,10 +302,10 @@ The infrastructure provisioning workflow will look like this:
 
       Step 1 - Create S3 Bucket 
         
-        AWS Console → S3 → Create Bucket  - Bucket name (shopnow-terraform-state-unique-123456)
-        Bucket names must be globally unique.
+      AWS Console → S3 → Create Bucket  - Bucket name (shopnow-terraform-state-unique-123456)
+      Bucket names must be globally unique.
 
-        Configure:
+      Configure:
         - Block all public access
         - Enable versioning
         - Enable server-side encryption
@@ -303,13 +313,14 @@ The infrastructure provisioning workflow will look like this:
         - Enable logging where appropriate
           Versioning helps recover earlier state versions if an accidental change occurs.
 
-        ![alt text](awss3bucketstatus.jpg)
+      <img width="2880" height="1800" alt="awss3bucketstatus" src="https://github.com/user-attachments/assets/ffc82778-a466-4e65-9187-84d6b63af9ef" />
+
 
       Step 2 - Configure Backend 
 
-        Create backend.tf and Replace the bucket name with your actual bucket.
+      Create backend.tf and Replace the bucket name with your actual bucket.
 
-        The S3 backend stores state remotely, and S3 lock files help coordinate concurrent Terraform operations.
+      The S3 backend stores state remotely, and S3 lock files help coordinate concurrent Terraform operations.
 
     17. Push Terraform Code to GitHub   
 
@@ -331,7 +342,7 @@ The infrastructure provisioning workflow will look like this:
 
     18. Configure Jenkins
 
-       Step 1: Jenkins will automatically execute Terraform commands and the workflow will be :
+      Step 1: Jenkins will automatically execute Terraform commands and the workflow will be :
 
                         GitHub
                           |
@@ -353,17 +364,18 @@ The infrastructure provisioning workflow will look like this:
                           v
                         AWS Infrastructure
 
-            ![alt text](jenkins.jpg)
+   <img width="2880" height="1798" alt="jenkins" src="https://github.com/user-attachments/assets/b28e964b-9ad3-4c42-bca3-44de657b21cd" />
 
-            ![alt text](jenkinspipelinecreated.jpg)
+   <img width="1920" height="1074" alt="jenkinspipelinecreated" src="https://github.com/user-attachments/assets/daddd8f5-e1df-40f3-ad46-b2733421e117" />
  
-            ![alt text](pipelinerunsuccessfully.jpg)
+   <img width="1920" height="1072" alt="pipelinerunsuccessfully" src="https://github.com/user-attachments/assets/6d5992c2-be15-43e7-936b-57b7fb4e2272" />
 
-       Step 2 : Configure AWS Credentials in Jenkins
 
-                Manage Jenkins → Credentials → System → Global credentials
+    Step 2 : Configure AWS Credentials in Jenkins
 
-                If using access keys for a temporary learning setup:
+    Manage Jenkins → Credentials → System → Global credentials
+
+    If using access keys for a temporary learning setup:
                 - Kind: Secret text or username/password, depending on the credential setup
                 - Store the AWS Access Key ID
                 - Store the AWS Secret Access Key securely
@@ -383,9 +395,11 @@ The infrastructure provisioning workflow will look like this:
         
         Go to Jenkins.
 
-        ![alt text](jenkinspipelinecreated-1.jpg)
+      <img width="1920" height="1074" alt="jenkinspipelinecreated-1" src="https://github.com/user-attachments/assets/be6179e4-77c0-4102-b173-1f2b5307a4d9" />
+
         
-        ![alt text](JenkinsBuildsucessfully.jpg)
+      <img width="1920" height="1080" alt="JenkinsBuildsucessfully" src="https://github.com/user-attachments/assets/28f34520-b3bb-4f2c-a130-02b7f7636722" />
+
 
         
 
@@ -400,7 +414,8 @@ The infrastructure provisioning workflow will look like this:
       | Approval | User approves infrastructure changes |
       | Terraform Apply | AWS resources created |
 
-        ![alt text](pipelinerunsuccessfully-1.jpg)
+   <img width="1920" height="1072" alt="pipelinerunsuccessfully-1" src="https://github.com/user-attachments/assets/feb89551-2180-4fdf-8177-2d5653bab8fc" />
+
 
     22. Verify Infrastructure in AWS
 
@@ -408,13 +423,184 @@ The infrastructure provisioning workflow will look like this:
 
     Final Output - AWS and Terraform 
     
-    ![alt text](projectrunwithbackendusingjenkins.jpg)
+   <img width="2880" height="1800" alt="projectrunwithbackendusingjenkins" src="https://github.com/user-attachments/assets/f9f4694d-2b55-4f01-979f-442ef5694628" />
+
 
 
 ## Sprint 3
 
 Sprint 3: Configuration Management with Ansible and Jenkins Pipeline
+1. Sprint Overview
+Sprint 3 focuses on automating server configuration using Ansible and Jenkins.
+
+In Sprint 2, Terraform was used to provision AWS infrastructure, such as EC2 instances. However, creating an EC2 instance does not automatically install or configure everything required to run an application.
+
+<img width="2880" height="1800" alt="image-1" src="https://github.com/user-attachments/assets/3c5e2cbe-77ea-4dfc-839a-0428dfc16d54" />
+
+Architecure 
+Working Steps for Architecture
+
+1.The developer pushes code to GitHub.
+2.Jenkins triggers the Terraform pipeline.
+3.Terraform creates the EC2 infrastructure.
+4.Terraform provides the EC2 public IP address.
+5.Jenkins triggers the Ansible pipeline after Terraform completes successfully.
+6.Ansible connects to the EC2 instance using SSH.
+7.Ansible installs Docker, kubectl, Git, and other dependencies.
+8.Ansible verifies that the installations are successful.
+9.Jenkins displays the pipeline status.
+
+Project Structure
+
+shopNow-capstone/
+│
+├── terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── outputs.tf
+│
+├── ansible/
+│   ├── inventory.ini
+│   ├── ansible.cfg
+│   ├── install_dependencies.yml
+│   └── Jenkinsfile
+│
+├── Jenkinsfile
+│
+└── README.md
+
+Steps for Confiuration
+
+Step 1 - Ansible must be installed on the machine where Jenkins will execute the Ansible playbooks. If your Jenkins server is running on Ubuntu, execute:
+
+<img width="2880" height="1800" alt="sudoaptupdate" src="https://github.com/user-attachments/assets/c881ec26-3fa1-4c18-a8b2-cd90d46b981d" />
+
+Install Ansible
+
+<img width="2880" height="1800" alt="install ansible" src="https://github.com/user-attachments/assets/ca5ce298-0a7c-451c-88ac-7af2398a797e" />
+
+Ansible Version
+
+<img width="2880" height="552" alt="ansible--version" src="https://github.com/user-attachments/assets/d94b6cc8-0814-4c25-ad29-ba6bec9018c2" />
+
+Step 2: Configure SSH Access to EC2
+Ansible can use the same SSH connection to configure the server.
+<img width="2880" height="1800" alt="connectwithubuntu" src="https://github.com/user-attachments/assets/fed7fd9d-4a66-48fe-8e45-70f990d7a5f2" />
+
+Step 3: Create the Ansible Inventory
+The inventory file tells Ansible which servers it needs to configure
+The inventory allows Ansible to identify and connect to the EC2 server.
+path - ansible/inventory.ini
+<img width="2346" height="1228" alt="ansibleinventorylist" src="https://github.com/user-attachments/assets/a358ac09-3ba7-4111-9aeb-cf51aa57b264" />
+
+For a larger environment, manually updating IP addresses is not practical.
+
+Later, we can use AWS dynamic inventory to automatically discover EC2 instances using AWS tags.
+
+For this sprint, static inventory is sufficient.
+
+Step 4: Configure Ansible
+
+Create:
+
+<img width="2880" height="1800" alt="ansibleconfigurationfile" src="https://github.com/user-attachments/assets/17df3532-d353-4177-8a27-5c293411679c" />
+
+Add:
+
+ [defaults]
+inventory = ./inventory.ini
+host_key_checking = False
+timeout = 30
+
+[privilege_escalation]
+become = True
+become_method = sudo
+become_user = root
 
 
+Step 5: Create the Ansible Playbook
 
-![alt text](image-1.png)
+Now we will create the playbook that installs Docker, kubectl, Git, and other dependencies.
+
+Create:
+
+ansible/install_dependencies.yml
+This tells Ansible:
+- Docker should be running.
+- Docker should automatically start after a reboot.
+If Docker is already running, Ansible does not need to restart it unnecessarily.
+
+This is called idempotency.
+
+Step 6: Test Ansible Manually
+Before integrating Ansible with Jenkins, test the playbook manually and Check whether Ansible can communicate with EC2:
+
+<img width="2880" height="636" alt="pingserver" src="https://github.com/user-attachments/assets/38f4dfb0-d9e1-4ac8-87ff-ee592ddf2e4b" />
+
+Step 7: Verify Configuration on EC2
+Connect to your EC2 instance:
+
+<img width="2378" height="1232" alt="shopnow-key" src="https://github.com/user-attachments/assets/ec2945b4-e45b-40cf-9462-8352dd66394c" />
+
+Next Step to check the docker Version
+<img width="2880" height="1800" alt="install_docker" src="https://github.com/user-attachments/assets/7e6b637a-bd06-4216-bb69-347571900e17" />
+
+<img width="2880" height="322" alt="docker--version" src="https://github.com/user-attachments/assets/5fa9850f-5c88-4581-b449-37e82cf80584" />
+
+<img width="2880" height="526" alt="dockerstatus" src="https://github.com/user-attachments/assets/17bdabf8-a527-4f44-a3a8-6843db03a594" />
+
+<img width="2880" height="1090" alt="dockerstatus_2" src="https://github.com/user-attachments/assets/de668b0f-d6c9-48eb-a36a-278123f88413" />
+
+Step 8: Integrate Ansible with Jenkins
+
+Now we automate the Ansible execution through Jenkins.Instead of manually running:
+ansible-playbook install_dependencies.yml
+
+Jenkins will execute the command automatically.
+Jenkins responsibilities
+Jenkins will:
+1. Download the project from GitHub.
+2. Access the Ansible directory.
+3. Execute the Ansible playbook.
+4. Configure the EC2 instance.
+5. Verify the configuration.
+6. Report success or failure.
+
+Configure Jenkins Credentials
+
+We should not store SSH private keys directly in the Jenkinsfile. Instead, use Jenkins Credentials.
+
+Step 9: Create Jenkinsfile for Ansible
+
+<img width="2880" height="358" alt="TestAnsible" src="https://github.com/user-attachments/assets/4918a327-a3de-4b84-b71b-31439782a6f6" />
+
+<img width="2876" height="1800" alt="syntaxcheckplaybook" src="https://github.com/user-attachments/assets/5719148a-e771-4341-9e27-26ab79ecd5d8" />
+This Jenkinsfile is an initial example. The SSH credential must be configured correctly, and the inventory must use the credential's key. The SSH agent setup and Ansible connection configuration should be aligned with your Jenkins environment. We will refine the pipeline during implementation.
+
+
+Step 10: Create Jenkins Job for Ansible
+
+Now create a Jenkins job to execute the Ansible pipeline.
+| Field | Value |
+|---|---|
+| SCM | Git |
+| Repository URL | Your ShopNow GitHub repository |
+| Branch | main |
+| Script Path | ansible/Jenkinsfile |
+
+Step 11: Execute Ansible Through Jenkins
+ShopNow-Ansible-Configuration
+
+Step 12: Connect Terraform Pipeline with Ansible Pipeline
+This is one of the most important tasks in Sprint 3.
+
+We want to create an automated pipeline where Terraform creates infrastructure and Ansible configures it.
+
+
+Step 13: Test the Entire Sprint 3 Workflow
+
+<img width="2880" height="358" alt="TestAnsible" src="https://github.com/user-attachments/assets/5779896a-58ee-4027-a4db-8da38c9d4886" />
+
+
+##Sprint 4
+
