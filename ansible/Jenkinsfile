@@ -1,0 +1,102 @@
+
+pipeline {
+
+    agent any
+
+    environment {
+        AWS_REGION = 'us-east-1'
+        AWS_DEFAULT_REGION = 'us-east-1'
+        ANSIBLE_DIR = 'ansible'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Check Ansible') {
+            steps {
+                sh '''
+                    ansible --version
+                '''
+            }
+        }
+
+        stage('Configure AWS Credentials') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        echo "AWS region configured: $AWS_REGION"
+                        aws sts get-caller-identity
+                    '''
+                }
+            }
+        }
+
+        stage('Configure EC2') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'shopnow-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
+
+                    sh '''
+                        chmod 600 "$SSH_KEY"
+
+                        cd ansible
+
+                        ansible-playbook \
+                        -i inventory/hosts.ini \
+                        playbooks/configure_server.yml \
+                        --private-key "$SSH_KEY" \
+                        -u "$SSH_USER"
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Configuration') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'shopnow-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
+
+                    sh '''
+                        cd ansible
+
+                        ansible shopnow_servers \
+                        -i inventory/hosts.ini \
+                        -m shell \
+                        -a "docker --version" \
+                        --private-key "$SSH_KEY" \
+                        -u "$SSH_USER"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Ansible configuration completed successfully!'
+        }
+
+        failure {
+            echo 'Ansible configuration failed. Check console output.'
+        }
+    }
+}
+

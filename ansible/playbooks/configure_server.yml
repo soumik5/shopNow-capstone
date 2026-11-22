@@ -1,0 +1,38 @@
+- name: Configure ShopNow Infrastructure
+  hosts: shopnow_servers
+  become: yes
+
+  tasks:
+
+    - name: Update system packages
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - curl
+          - wget
+          - unzip
+          - vim
+          - htop
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Display configuration success
+      debug:
+        msg: "ShopNow EC2 configuration completed successfully!"
+
+
+
