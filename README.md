@@ -602,5 +602,539 @@ Step 13: Test the Entire Sprint 3 Workflow
 <img width="2880" height="358" alt="TestAnsible" src="https://github.com/user-attachments/assets/5779896a-58ee-4027-a4db-8da38c9d4886" />
 
 
+
+
+
+
 ##Sprint 4
 
+Sprint 4: CI/CD Pipeline for Application Deployment on Kubernetes (EKS)
+
+Sprint 4 focuses on building a complete CI/CD pipeline using Jenkins, Docker, AWS ECR, and Kubernetes (EKS).
+
+In the previous sprints, we completed the foundational work:
+- Sprint 1: Application development.
+- Sprint 2: Infrastructure provisioning using Terraform.
+- Sprint 3: Configuration management using Ansible and Jenkins.
+Now, in Sprint 4, we will automate the process of taking application code from GitHub, building it into a Docker image, pushing the image to Amazon ECR, and deploying it to Kubernetes running on Amazon EKS.
+
+The goal is to eliminate manual deployment steps and create a reliable deployment pipeline.
+The objectives of this sprint are:
+- Create a multi-stage Jenkins pipeline.
+- Automate application build and testing.
+- Build Docker images using Jenkins.
+- Push Docker images to Amazon Elastic Container Registry (ECR).
+- Deploy the application to Amazon EKS.
+- Create Kubernetes Deployment and Service manifests.
+- Configure health checks.
+- Configure Horizontal Pod Autoscaler (HPA).
+- Validate the application deployment.
+- Automate the workflow from GitHub to EKS.
+
+Architecture
+The architecture for Sprint 4 will look like this:
+If the cluster is ACTIVE but nodes are missing, resolve the node group/IAM configuration before continuing.
+Sprint 4 Project Structure
+Your ShopNow project should contain the following structure:
+shopNow-capstone/
+│
+├── frontend/
+│   ├── Dockerfile
+│   └── application files
+│
+├── backend/
+│   ├── Dockerfile
+│   └── application files
+│
+├── kubernetes/
+│   ├── backend-deployment.yaml
+│   ├── backend-service.yaml
+│   ├── frontend-deployment.yaml
+│   ├── frontend-service.yaml
+│   └── hpa.yaml
+│
+├── Jenkinsfile
+│
+├── docker-compose.yml
+│
+└── README.md
+
+Depending on your application architecture, the frontend and backend may be deployed separately.
+
+For ShopNow, we will use separate Docker images for the frontend and backend.
+
+This gives us the ability to:
+- Scale frontend independently.
+- Scale backend independently.
+- Update frontend without redeploying backend.
+- Update backend without redeploying frontend.
+
+Step 1: Create AWS ECR Repositories
+Amazon Elastic Container Registry (ECR) is a container registry that stores Docker images.
+
+Jenkins will build Docker images and push them to ECR.
+
+<img width="2880" height="1800" alt="CreateECR" src="https://github.com/user-attachments/assets/61a537a2-3b80-430d-b37d-d1b8b5f43822" />
+
+<img width="2880" height="1800" alt="CreateECRRepo" src="https://github.com/user-attachments/assets/65bdbf80-e3a9-4e2b-85a3-38fc8a03f462" />
+
+Step 2: Configure AWS Authentication for Jenkins
+
+Jenkins requires permission to access AWS resources.
+
+It must be able to:
+- Authenticate to AWS.
+- Log in to ECR.
+- Push Docker images.
+- Access EKS.
+- Deploy Kubernetes resources.
+The recommended approach is to use an IAM role or short-lived credentials wherever possible.
+
+If Jenkins is running on an EC2 instance, an IAM instance role is generally preferred over storing permanent AWS access keys.
+
+The Jenkins EC2 role should have the necessary permissions for:
+- ECR authentication.
+- ECR image push and pull.
+- EKS cluster access.
+- Kubernetes deployment authorization, where applicable.
+
+Step 3: Authenticate Docker with AWS ECR
+Before pushing Docker images, Docker must authenticate with ECR.The following command uses the AWS CLI to retrieve an authentication token.
+<img width="2880" height="1800" alt="amazonEKS" src="https://github.com/user-attachments/assets/dccddcff-dc4f-49e2-b72b-7ed829edcb24" />
+
+Step 4: Prepare Dockerfiles
+We need Dockerfiles to build the application images. Because ShopNow contains a frontend and backend, we will create two Docker images.
+Frontend Dockerfile
+<img width="2880" height="1780" alt="dockerbuildfrontend" src="https://github.com/user-attachments/assets/be892383-29ca-478f-a906-b8db65945337" />
+Backend Dockerfile
+<img width="2880" height="1800" alt="dockerbuildbackend" src="https://github.com/user-attachments/assets/35107181-b752-46e2-b94e-65c99c78d038" />
+
+Step 5: Build Docker Images
+Before Jenkins automates the process, test Docker builds locally.
+<img width="2880" height="1792" alt="dockerimages" src="https://github.com/user-attachments/assets/c89376b0-7736-4b62-8ad5-a74809b56a80" />
+
+Step 6: Tag Docker Images for ECR
+Docker images must be tagged with the ECR repository URL before they can be pushed.
+
+<img width="2880" height="1800" alt="dockerbackendbuildoutput" src="https://github.com/user-attachments/assets/6614a573-f0d0-4ff6-bd4d-87a2bac9b7a0" />
+
+Step 7: Push Images to AWS ECR
+After Docker authentication, push the backend image.
+<img width="2880" height="1800" alt="keyrings" src="https://github.com/user-attachments/assets/e90c7ee2-9584-410d-921a-be6aaca67a95" />
+
+Step 8: Create Kubernetes Deployment Manifests
+
+Kubernetes Deployment manages Pods.Instead of manually creating containers, we define the desired state in YAML files.Kubernetes ensures that the desired number of Pods are running.
+
+kubernetes/
+│
+├── backend-deployment.yaml
+├── backend-service.yaml
+├── frontend-deployment.yaml
+├── frontend-service.yaml
+└── hpa.yaml
+
+Step 9: Backend Deployment
+Create:
+kubernetes/backend-deployment.yaml
+
+
+Step 10: Backend Service
+Create:
+kubernetes/backend-service.yaml
+
+Step 11: Frontend Deployment
+Create:
+kubernetes/frontend-deployment.yaml
+
+Step 11: Frontend Service
+Create:
+kubernetes/frontend-service.yaml
+
+Step 12: Configure Health Checks
+Kubernetes uses health checks to determine whether containers are functioning correctly.We are using two types of health checks.
+A. Readiness Probe
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+
+Readiness checks answer:
+Is this Pod ready to receive traffic?
+
+If the Pod is not ready, Kubernetes does not send Service traffic to it.
+
+B. Liveness Probe
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+
+Liveness checks answer:
+Is this container still healthy?
+
+If the liveness probe repeatedly fails, Kubernetes may restart the container.
+
+Step 13 : Configure Horizontal Pod Autoscaler (HPA)
+
+HPA automatically adjusts the number of Pods based on resource utilization.
+
+Step 12: Configure Jenkins Pipeline
+
+Now we will automate the entire process using Jenkins.
+
+The pipeline will contain the following stages:
+
+
+Checkout
+   |
+   v
+Build
+   |
+   v
+Test
+   |
+   v
+Docker Build
+   |
+   v
+ECR Login
+   |
+   v
+Push Images
+   |
+   v
+Deploy to EKS
+   |
+   v
+Verify Deployment
+
+Step 13: Jenkins Credentials
+Jenkins needs access to AWS and EKS.
+
+Depending on your Jenkins setup, you can use:
+- IAM instance role for Jenkins EC2.
+- IAM role assumption.
+- AWS credentials stored securely in Jenkins.
+If using IAM instance roles, verify that the Jenkins server can access AWS.
+
+Step 13: Create Jenkinsfile
+Create a Jenkinsfile in the root of your ShopNow project.
+Understanding the Jenkins Pipeline
+
+Stage 1: Checkout
+stage('Checkout') {
+    steps {
+        git branch: 'main',
+            url: 'YOUR_GITHUB_REPOSITORY_URL'
+    }
+}
+
+Jenkins downloads your ShopNow application from GitHub.
+
+This is the first stage of the pipeline.
+Stage 2: Build Backend
+stage('Build Backend') {
+    steps {
+        dir('backend') {
+            sh 'npm install'
+        }
+    }
+}
+
+This stage installs the backend dependencies.
+
+Jenkins executes:
+npm install
+
+The backend dependencies are downloaded based on package.json.
+Stage 3: Test Backend
+stage('Test Backend') {
+    steps {
+        dir('backend') {
+            sh 'npm test'
+        }
+    }
+}
+
+This stage runs the backend tests.
+
+If tests fail, the pipeline stops before the deployment stages.
+
+This prevents broken application code from being deployed to EKS.
+Your project must have a working test script in package.json. If it does not, we will configure it according to the actual ShopNow test files.
+
+Stage 4: Build Frontend
+stage('Build Frontend') {
+    steps {
+        dir('frontend') {
+            sh 'npm install'
+            sh 'npm run build'
+        }
+    }
+}
+
+Jenkins installs frontend dependencies and generates production build files.
+Stage 5: Docker Build
+docker build -t shopnow-backend:latest ./backend
+
+This creates the backend Docker image.
+docker build -t shopnow-frontend:latest ./frontend
+
+This creates the frontend Docker image.
+
+Now the application is packaged into containers.
+Stage 6: ECR Login
+aws ecr get-login-password --region ${AWS_REGION}
+
+Jenkins obtains an authentication token from AWS.
+
+Docker uses the token to authenticate with ECR.
+Stage 7: Push to ECR
+docker push ...
+
+Jenkins uploads the Docker images to AWS ECR.
+
+Now EKS can pull the images.
+Stage 8: Configure EKS
+aws eks update-kubeconfig
+
+This command configures Kubernetes access for Jenkins.
+
+Jenkins uses the AWS CLI to retrieve EKS cluster information and configure the local kubeconfig.
+
+The following command verifies cluster connectivity:
+kubectl get nodes
+
+Stage 9: Deploy to EKS
+kubectl apply -f kubernetes/backend-deployment.yaml
+
+Kubernetes creates or updates the backend Deployment.
+
+Similarly:
+kubectl apply -f kubernetes/frontend-deployment.yaml
+
+Kubernetes deploys the frontend.
+
+The Service manifests expose the application through Kubernetes networking.
+Stage 10: Verify Deployment
+kubectl rollout status deployment/shopnow-backend
+
+This checks whether the backend Deployment rollout has completed.
+kubectl rollout status deployment/shopnow-frontend
+
+This checks the frontend Deployment.
+
+If both complete successfully, the deployment is considered successful at the Kubernetes rollout level.
+
+Step 11: Configure Kubernetes Access for Jenkins
+
+Jenkins must have permission to access your EKS cluster.After configuring AWS credentials on Jenkins, test:
+aws eks update-kubeconfig --region us-east-1 --name shopnow-cluster
+kubectl get nodes
+
+then AWS authentication or EKS Kubernetes authorization is not configured correctly.
+
+The Jenkins IAM identity must be granted the required EKS cluster access permissions.
+
+Depending on your EKS configuration, this may be managed using EKS access entries and Kubernetes access policies, or the legacy aws-auth ConfigMap.
+
+AWS authentication and Kubernetes authorization are two separate things:
+1. IAM allows Jenkins to authenticate as an AWS identity.
+2. EKS access configuration allows that identity to perform Kubernetes operations.
+Both are required.
+
+Step 12: Create Jenkins Pipeline Job
+
+Open Jenkins.
+Step 1
+Click:
+New Item
+
+Step 2
+Enter:
+ShopNow-CI-CD-EKS
+
+Step 3
+Select:
+Pipeline
+
+Click:
+OK
+
+Step 4
+Under Pipeline configuration, choose:
+Pipeline script from SCM
+
+Step 15: Run the Pipeline
+
+Open the Jenkins job.
+
+Click:
+Build Now
+
+Jenkins will execute:
+Checkout
+   ↓
+Build Backend
+   ↓
+Test Backend
+   ↓
+Build Frontend
+   ↓
+Docker Build
+   ↓
+ECR Login
+   ↓
+Tag Images
+   ↓
+Push to ECR
+   ↓
+Configure EKS
+   ↓
+Deploy to EKS
+   ↓
+Verify Deployment
+
+Monitor:
+Jenkins
+    → Build
+        → Console Output
+
+The pipeline should complete with:
+Finished: SUCCESS
+
+Step 16: Verify Deployment on EKS
+After the Jenkins pipeline completes, verify the Kubernetes resources.
+Check Deployments
+kubectl get deployments
+NAME                READY   UP-TO-DATE   AVAILABLE
+shopnow-backend     2/2     2            2
+shopnow-frontend    2/2     2            2
+
+Check Pods
+kubectl get pods
+
+NAME                                  READY   STATUS
+shopnow-backend-xxxxx                 1/1     Running
+shopnow-backend-yyyyy                 1/1     Running
+shopnow-frontend-xxxxx                1/1     Running
+shopnow-frontend-yyyyy                1/1     Running
+
+Check Services
+kubectl get services
+
+Expected:
+NAME                       TYPE           PORT
+shopnow-backend-service    ClusterIP     5000
+shopnow-frontend-service   LoadBalancer   80
+
+Check HPA
+kubectl get hpa
+
+Expected:
+NAME                   TARGETS          MINPODS   MAXPODS   REPLICAS
+shopnow-backend-hpa     10%/70%        2         5         2
+
+Actual CPU values may vary.
+
+Step 17: Access the Application
+Check the frontend Service:
+kubectl get svc shopnow-frontend-service
+
+If the Service type is LoadBalancer, AWS may provision a load balancer.
+
+You will see an external address similar to:
+
+EXTERNAL-IP
+a1b2c3d4e5f6.us-east-1.elb.amazonaws.com
+
+Open the external DNS address in your browser:
+http://a1b2c3d4e5f6.us-east-1.elb.amazonaws.com
+
+Your ShopNow frontend should load.
+
+Step 18: Test Auto-Scaling
+We configured:minReplicas: 2
+maxReplicas: 5
+
+Now verify HPA:
+kubectl get hpa
+
+Describe HPA:
+kubectl describe hpa shopnow-backend-hpa
+
+If Metrics Server is working, Kubernetes can monitor CPU utilization.
+
+The HPA will attempt to scale the backend based on the configured target.
+Current Pods: 2
+CPU Utilization: 85%
+Target: 70%
+
+Kubernetes may increase the number of Pods:
+The exact scale-up behavior depends on metrics, current load, resource availability, and HPA behavior settings.
+
+Step 19: Test the End-to-End CI/CD Pipeline
+The final test is to verify the complete workflow.
+Test scenario
+Make a small change in your application.
+
+If a GitHub webhook is configured, Jenkins should automatically start the pipeline.
+
+Otherwise, manually trigger the Jenkins job.
+
+Troubleshooting
+Issue 1: Docker Build Failed
+Error:
+
+Possible causes
+- Dockerfile missing.
+- Incorrect path.
+- Dependencies unavailable.
+- Incorrect build context.
+  
+ECR Authentication Failed
+
+no basic auth credentials
+
+ImagePullBackOff
+kubectl get pods
+
+CrashLoopBackOff
+kubectl logs POD_NAME
+
+Possible causes:
+- Application startup error.
+- Missing environment variables.
+- MongoDB connection failure.
+- Incorrect container port.
+- Incorrect Docker startup command.
+
+Pods Are Pending
+
+kubectl describe pod POD_NAME
+Possible causes:
+- Insufficient CPU.
+- Insufficient memory.
+- No available worker nodes.
+- Incorrect resource requests.
+
+LoadBalancer Pending
+kubectl get svc
+
+If the external address is still pending, check:
+- Worker node networking.
+- Subnets.
+- AWS load balancer provisioning permissions.
+- Service annotations.
+- AWS networking configuration.
+  
+Jenkins Cannot Access EKS
+Check:
+aws sts get-caller-identity
+
+Then:
+aws eks update-kubeconfig --region us-east-1 --name shopnow-cluster
+And:
+kubectl get nodes
+- 
